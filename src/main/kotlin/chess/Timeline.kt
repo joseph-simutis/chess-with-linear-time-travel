@@ -1,6 +1,10 @@
 package io.github.josephsimutis.chess
 
 data class Timeline(val boards: ArrayList<BoardState>) {
+    constructor(startingPosition: Boolean) : this(ArrayList()) {
+        if (startingPosition) this += BoardState.START
+    }
+
     operator fun plusAssign(board: BoardState) {
         boards += board
     }
@@ -13,4 +17,14 @@ data class Timeline(val boards: ArrayList<BoardState>) {
     }
 
     fun isValidMove(index: Int, move: BoardState) = getValidMoves(index)?.contains(move)
+
+    fun attemptMove(index: Int, move: BoardState) {
+        //if (isValidMove(index, move) == true)
+            move(index, move)
+    }
+
+    fun move(index: Int, move: BoardState) {
+        if (index == boards.lastIndex) boards += move
+        else boards[index] = move
+    }
 }
