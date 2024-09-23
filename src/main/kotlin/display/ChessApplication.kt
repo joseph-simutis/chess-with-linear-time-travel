@@ -42,16 +42,16 @@ class ChessApplication : Application() {
     private fun redrawPieces(grid: GridPane) {
         for (x in 0..7) {
             for (y in 0..7) {
-                game.boards[currentBoard][x + 1, 8 - y].also { square ->
-                    if (square != null) {
-                        if (square.piece != null && square.side != null) {
-                            (grid.children[(x * 8) + y] as StackPane).also { stack ->
-                                if (stack.children.size > 1) stack.children.removeAt(1)
-                                stack.children.add(PieceView({ startX, startY, endX, endY ->
+                (grid.children[(x * 8) + y] as StackPane).also { stack ->
+                    if (stack.children.size > 1) stack.children.removeAt(1)
+                    game.boards[currentBoard][x + 1, 8 - y].also { square ->
+                        if (square != null) {
+                            if (square.piece != null && square.side != null) {
+                                stack.children.add(PieceView({ startX, startY ->
                                     game.attemptMove(
                                         currentBoard,
                                         game.boards[currentBoard]
-                                            .with(startX, 9 - startY, square)?.with(endX - 8, endY - 8, Square.NONE)
+                                            .with(startX, 9 - startY, square)?.with(x + 1, 8 - y, null)
                                             ?: return@PieceView
                                     )
                                     redrawPieces(grid)

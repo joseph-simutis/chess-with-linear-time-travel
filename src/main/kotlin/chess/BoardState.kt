@@ -24,10 +24,10 @@ data class BoardState(private val board: Array<Square>) {
         return this[notation[0].code - 96, notation[1].code - 48]
     }
 
-    fun with(file: Int, rank: Int, change: Square): BoardState? {
+    fun with(file: Int, rank: Int, change: Square?): BoardState? {
         if (!(1..8).contains(file) || !(1..8).contains(rank)) return null
         return copy().apply {
-            board[((rank - 1) * 8) + file - 1] = change
+            board[((rank - 1) * 8) + file - 1] = change ?: Square.NONE
         }
     }
 

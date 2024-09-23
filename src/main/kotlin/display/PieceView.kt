@@ -6,7 +6,7 @@ import javafx.scene.image.ImageView
 import java.io.FileInputStream
 import kotlin.math.floor
 
-class PieceView(val attemptMove: (Int, Int, Int, Int) -> Unit, piece: Square, pieceSpritePath: String) : ImageView(Image(FileInputStream("$pieceSpritePath${piece.side!!.sideName}_${piece.piece!!.pieceName}.png"))) {
+class PieceView(val attemptMove: (Int, Int) -> Unit, piece: Square, pieceSpritePath: String) : ImageView(Image(FileInputStream("$pieceSpritePath${piece.side!!.sideName}_${piece.piece!!.pieceName}.png"))) {
     private var anchorX = 0.0
     private var anchorY = 0.0
 
@@ -24,17 +24,9 @@ class PieceView(val attemptMove: (Int, Int, Int, Int) -> Unit, piece: Square, pi
             translateX = 0.0
             translateY = 0.0
             parent.viewOrder = 0.0
-            println(
-                floor(event.sceneX / (scene.width / 8)).toInt().toString() + ", " + floor(event.sceneY / (scene.height / 8)).toInt().toString()
-            )
-            println(
-                floor(anchorX / (scene.width / 8)).toInt().toString() + ", " + floor(anchorY / (scene.height / 8)).toInt().toString()
-            )
             attemptMove(
                 floor(event.sceneX / (scene.width / 8)).toInt() + 1,
-                floor(event.sceneY / (scene.height / 8)).toInt() + 1,
-                floor(anchorX / (scene.width / 8)).toInt() + 1,
-                floor(anchorY / (scene.height / 8)).toInt() + 1
+                floor(event.sceneY / (scene.height / 8)).toInt() + 1
             )
         }
     }
