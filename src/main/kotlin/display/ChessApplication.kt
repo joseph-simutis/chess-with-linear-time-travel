@@ -1,8 +1,7 @@
 package io.github.josephsimutis.display
 
-import io.github.josephsimutis.chess.BoardState
-import io.github.josephsimutis.chess.Square
 import io.github.josephsimutis.chess.Timeline
+import io.github.josephsimutis.chess.toNotation
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.layout.GridPane
@@ -10,7 +9,6 @@ import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
 import javafx.stage.Stage
-import kotlin.system.exitProcess
 
 class ChessApplication : Application() {
     // Todo: allow user to add path manually
@@ -19,7 +17,6 @@ class ChessApplication : Application() {
     private var currentBoard = 0
 
     override fun start(stage: Stage) {
-        game += BoardState.START
         stage.title = "Chess with Linear Time Travel"
         stage.scene = Scene(GridPane().also { grid ->
             for (x in 0..7) {
@@ -44,19 +41,18 @@ class ChessApplication : Application() {
             for (y in 0..7) {
                 (grid.children[(x * 8) + y] as StackPane).also { stack ->
                     if (stack.children.size > 1) stack.children.removeAt(1)
-                    game.boards[currentBoard][x + 1, 8 - y].also { square ->
-                        if (square != null) {
-                            if (square.piece != null && square.side != null) {
-                                stack.children.add(PieceView({ startX, startY ->
+                    game.boards[currentBoard][x + 1, 8 - y].also { piece ->
+                        if (piece != null) {
+                            stack.children.add(PieceView({ endX, endY ->
+                                println("${toNotation(x + 1, 8 - y)} -> ${toNotation(endX, 9 - endY)}")
+                                game.boards[currentBoard].moved(x + 1, 8 - y, endX, 9 - endY)?.let { newBoard ->
                                     game.attemptMove(
                                         currentBoard,
-                                        game.boards[currentBoard]
-                                            .with(startX, 9 - startY, square)?.with(x + 1, 8 - y, null)
-                                            ?: return@PieceView
+                                        newBoard
                                     )
-                                    redrawPieces(grid)
-                                }, square, pieceSpritePath))
-                            }
+                                }
+                                redrawPieces(grid)
+                            }, piece, pieceSpritePath))
                         }
                     }
                 }

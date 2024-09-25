@@ -1,12 +1,11 @@
 package io.github.josephsimutis.display
 
-import io.github.josephsimutis.chess.Square
+import io.github.josephsimutis.chess.pieces.Piece
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import java.io.FileInputStream
-import kotlin.math.floor
 
-class PieceView(val attemptMove: (Int, Int) -> Unit, piece: Square, pieceSpritePath: String) : ImageView(Image(FileInputStream("$pieceSpritePath${piece.side!!.sideName}_${piece.piece!!.pieceName}.png"))) {
+class PieceView(val attemptMove: (Int, Int) -> Unit, piece: Piece, pieceSpritePath: String) : ImageView(Image(FileInputStream("$pieceSpritePath${piece.side.sideName}_${piece.pieceName}.png"))) {
     private var anchorX = 0.0
     private var anchorY = 0.0
 
@@ -25,8 +24,8 @@ class PieceView(val attemptMove: (Int, Int) -> Unit, piece: Square, pieceSpriteP
             translateY = 0.0
             parent.viewOrder = 0.0
             attemptMove(
-                floor(event.sceneX / (scene.width / 8)).toInt() + 1,
-                floor(event.sceneY / (scene.height / 8)).toInt() + 1
+                (event.sceneX / scene.width * 8).toInt() + 1,
+                (event.sceneY / scene.height * 8).toInt() + 1
             )
         }
     }
