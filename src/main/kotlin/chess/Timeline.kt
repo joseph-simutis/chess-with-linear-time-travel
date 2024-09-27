@@ -1,42 +1,32 @@
 package io.github.josephsimutis.chess
 
-data class Timeline(val boards: ArrayList<BoardState>) {
-    constructor(startingPosition: Boolean) : this(ArrayList()) {
-        if (startingPosition) this += BoardState.START
-    }
+data class Timeline(val history: ArrayList<Pair<Move, BoardState>>) {
+    constructor() : this(ArrayList())
 
-    operator fun plusAssign(board: BoardState) {
-        boards += board
-    }
+    operator fun get(index: Int): BoardState =
+        if (history.isEmpty() || index < 0) BoardState.START
+        else if (index > history.lastIndex) history.last().second
+        else history[index].second
 
-    fun getActiveSide(index: Int) =
-        if (index >= boards.size || index < 0) null else if (index % 2 == 0) Side.LIGHT else Side.DARK
+    private fun getActiveSide(index: Int) = if (index % 2 != 0) Side.LIGHT else Side.DARK
 
-    fun getValidMoves(index: Int): Array<BoardState>? {
-        val moves = ArrayList<BoardState>()
-        val board = boards.getOrElse(index) { return null }
-        for (square in 0..63) {
-            val file = square % 8
-            val rank = square / 8
-            val piece = board[file, rank]
-            val side = getActiveSide(index)
-            if (piece?.side == side) {
-                moves.addAll(piece?.getMoves(board, file, rank) ?: return null)
-            }
-        }
-        return moves.toTypedArray()
-    }
-
-    fun attemptMove(index: Int, move: BoardState): Boolean {
-        if (getValidMoves(index)?.contains(move) == true) {
+    fun attemptMove(index: Int, move: Move): Boolean {
+        this[index]?.also { board ->
+            if (board[move.startFile, move.startRank]?.side != getActiveSide(index)) return false
+            if (board[move.startFile, move.startRank]
+                    ?.getMoves(board, move.startFile, move.startRank)
+                    ?.contains(move) != true
+            ) return false
             move(index, move)
-            return true
         }
-        return false
+        return true
     }
 
-
-    fun move(index: Int, move: BoardState) {
-        if (index == boards.lastIndex) boards += move else boards[index] = move
+    fun move(index: Int, move: Move) {
+        Pair(move, this[index - 1].with(move)).also { event ->
+            if (history.isEmpty() || index == history.lastIndex) history += event
+            else history[index] = event
+            //println("The move history is: $history")
+        }
     }
 }

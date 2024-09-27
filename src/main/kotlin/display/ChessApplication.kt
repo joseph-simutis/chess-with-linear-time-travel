@@ -1,7 +1,7 @@
 package io.github.josephsimutis.display
 
+import io.github.josephsimutis.chess.Move
 import io.github.josephsimutis.chess.Timeline
-import io.github.josephsimutis.chess.toNotation
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.layout.GridPane
@@ -13,12 +13,19 @@ import javafx.stage.Stage
 class ChessApplication : Application() {
     // Todo: allow user to add path manually
     private val pieceSpritePath = "/home/josephsimutis/Documents/test-chess-sprites/"
-    private val game = Timeline(true)
-    private var currentBoard = 0
+    private val game = Timeline()
+    private var currentBoard = -1
 
     override fun start(stage: Stage) {
         stage.title = "Chess with Linear Time Travel"
-        stage.scene = Scene(GridPane().also { grid ->
+        stage.scene = Scene(GridPane().also { grid -> redrawBoard(grid) }, 512.0, 512.0)
+        stage.isResizable = false
+        stage.show()
+    }
+
+    private fun redrawBoard(grid: GridPane) {
+        game[currentBoard].also { board ->
+            grid.children.clear()
             for (x in 0..7) {
                 for (y in 0..7) {
                     grid.add(StackPane().also { stack ->
@@ -27,34 +34,17 @@ class ChessApplication : Application() {
                             widthProperty().bind(grid.widthProperty().divide(8))
                             heightProperty().bind(grid.heightProperty().divide(8))
                         })
-                    }, x, y)
-                }
-            }
-            redrawPieces(grid)
-        }, 512.0, 512.0)
-        stage.isResizable = false
-        stage.show()
-    }
-
-    private fun redrawPieces(grid: GridPane) {
-        for (x in 0..7) {
-            for (y in 0..7) {
-                (grid.children[(x * 8) + y] as StackPane).also { stack ->
-                    if (stack.children.size > 1) stack.children.removeAt(1)
-                    game.boards[currentBoard][x + 1, 8 - y].also { piece ->
-                        if (piece != null) {
+                        board[x + 1, 8 - y]?.apply {
                             stack.children.add(PieceView({ endX, endY ->
-                                println("${toNotation(x + 1, 8 - y)} -> ${toNotation(endX, 9 - endY)}")
-                                game.boards[currentBoard].moved(x + 1, 8 - y, endX, 9 - endY)?.let { newBoard ->
-                                    game.attemptMove(
-                                        currentBoard,
-                                        newBoard
-                                    )
-                                }
-                                redrawPieces(grid)
-                            }, piece, pieceSpritePath))
+                                val moved = game.attemptMove(
+                                    currentBoard,
+                                    Move(x + 1, 8 - y, endX, 9 - endY)
+                                )
+                                if (game.history.lastIndex - 1 == currentBoard) currentBoard++
+                                if (moved) redrawBoard(grid)
+                            }, this, pieceSpritePath))
                         }
-                    }
+                    }, x, y)
                 }
             }
         }

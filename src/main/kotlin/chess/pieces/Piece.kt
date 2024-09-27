@@ -1,41 +1,28 @@
 package io.github.josephsimutis.chess.pieces
 
 import io.github.josephsimutis.chess.BoardState
+import io.github.josephsimutis.chess.Move
 import io.github.josephsimutis.chess.Side
 
 abstract class Piece(val pieceName: String, val side: Side) {
-    abstract fun getMoves(board: BoardState, file: Int, rank: Int): Array<BoardState>
+    abstract fun getMoves(board: BoardState, file: Int, rank: Int): Array<Move>
 
-    fun checkMove(
-        board: BoardState,
-        startFile: Int,
-        startRank: Int,
-        offsetFile: Int,
-        offsetRank: Int,
-        move: Boolean = true,
-        capture: Boolean = true
-    ) = if (move && board[startFile + offsetFile, startRank + offsetRank] == null) board.moved(
-        startFile,
-        startRank,
-        startFile + offsetFile,
-        startRank + offsetRank
-    )
-    else if (capture && board[startFile + offsetFile, startRank + offsetRank]?.side == !side) board.moved(
-        startFile,
-        startRank,
-        startFile + offsetFile,
-        startRank + offsetRank
-    )
-    else null
+    fun checkMove(board: BoardState, move: Move, canMove: Boolean = true, canCapture: Boolean = true) =
+        if (!move.inBounds) null
+        else if (canMove && board[move.endFile, move.endRank] == null
+            || canCapture && board[move.endFile, move.endRank]?.side == !side
+        ) move
+        else null
 
-    fun checkLine(board: BoardState, startFile: Int, startRank: Int, incFile: Int, incRank: Int): Array<BoardState> {
+    fun checkLine(board: BoardState, startFile: Int, startRank: Int, incFile: Int, incRank: Int): Array<Move> {
         var currentFile = startFile
         var currentRank = startRank
-        val moves = ArrayList<BoardState>()
+        val moves = ArrayList<Move>()
         while (true) {
             currentFile += incFile
             currentRank += incRank
-            val move = checkMove(board, startFile, startRank, currentFile, currentRank) ?: return moves.toTypedArray()
+            val move =
+                checkMove(board, Move(startFile, startRank, currentFile, currentRank)) ?: return moves.toTypedArray()
             moves += move
         }
     }

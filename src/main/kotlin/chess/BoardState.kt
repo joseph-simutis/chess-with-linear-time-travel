@@ -3,33 +3,52 @@ package io.github.josephsimutis.chess
 import io.github.josephsimutis.chess.pieces.*
 
 data class BoardState(private val board: Array<Piece?>) {
-    val hasLightKing: Boolean
-        get() = board.contains(Piece.LIGHT_KING)
-    val hasDarkKing: Boolean
-        get() = board.contains(Piece.DARK_KING)
+    val lightKingCount: Int
+        get() = board.count { it == Piece.LIGHT_KING }
+    val darkKingCount: Int
+        get() = board.count { it == Piece.DARK_KING }
     val gameOver: Boolean
-        get() = !hasLightKing || !hasDarkKing
+        get() = lightKingCount < 1 || darkKingCount < 1
     val winner: Side?
-        get() = if (hasLightKing && !hasDarkKing) Side.LIGHT
-        else if (!hasLightKing && hasDarkKing) Side.DARK
+        get() = if (!gameOver) null
+        else if (lightKingCount > darkKingCount) Side.LIGHT
+        else if (lightKingCount < darkKingCount) Side.DARK
         else null
 
     operator fun get(file: Int, rank: Int): Piece? {
         if (!(1..8).contains(file) || !(1..8).contains(rank)) return null
+        //println("$file, $rank = ${board[((rank - 1) * 8) + file - 1]}")
         return board[((rank - 1) * 8) + file - 1]
     }
 
     operator fun get(notation: String) = fromNotation(notation)?.also { (file, rank) -> this[file, rank] }
 
-    fun with(file: Int, rank: Int, change: Piece?): BoardState? {
-        if (!(1..8).contains(file) || !(1..8).contains(rank)) return null
-        return copy().apply {
-            board[((rank - 1) * 8) + file - 1] = change
-        }
+    operator fun set(file: Int, rank: Int, piece: Piece?) {
+        if (!(1..8).contains(file) || !(1..8).contains(rank)) throw ArrayIndexOutOfBoundsException(
+            "Tried to write to invalid square ${
+                toNotation(
+                    file,
+                    rank
+                )
+            }!"
+        )
+        board[((rank - 1) * 8) + file - 1] = piece
     }
 
-    fun moved(startFile: Int, startRank: Int, endFile: Int, endRank: Int) =
-        this.with(endFile, endRank, this[startFile, startRank])?.with(startFile, startRank, null).apply { this?.get(endFile, endRank)?.move() }
+    operator fun set(notation: String, piece: Piece?) {
+        fromNotation(notation)?.also { (file, rank) -> this[file, rank] = piece }
+    }
+
+    fun with(move: Move): BoardState {
+        if (!move.inBounds) throw IndexOutOfBoundsException("Attempted to make move that was out of bounds!")
+        val piece = this[move.startFile, move.startRank]
+        piece?.move()
+        return copy().also { copy ->
+            copy[move.endFile, move.endRank] = piece
+            copy[move.startFile, move.startRank] = null
+            move.additionalEffects(copy)
+        }
+    }
 
     operator fun iterator() = board.iterator()
 
@@ -47,7 +66,6 @@ data class BoardState(private val board: Array<Piece?>) {
     }
 
     companion object {
-        // TODO: Try to simplfy.
         val START = BoardState(Array(64) { index ->
             when {
                 index == 0 || index == 7 -> Rook(Side.LIGHT)
