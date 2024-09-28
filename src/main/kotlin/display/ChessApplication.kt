@@ -3,11 +3,20 @@ package io.github.josephsimutis.display
 import io.github.josephsimutis.chess.Timeline
 import io.github.josephsimutis.chess.moves.StandardMove
 import javafx.application.Application
+import javafx.geometry.Pos
 import javafx.scene.Scene
+import javafx.scene.control.Label
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.GridPane
+import javafx.scene.layout.HBox
 import javafx.scene.layout.StackPane
+import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
+import javafx.scene.text.Font
+import javafx.scene.text.Text
+import javafx.scene.text.TextAlignment
 import javafx.stage.Stage
 
 class ChessApplication : Application() {
@@ -18,7 +27,42 @@ class ChessApplication : Application() {
 
     override fun start(stage: Stage) {
         stage.title = "Chess with Linear Time Travel"
-        stage.scene = Scene(GridPane().also { grid -> redrawBoard(grid) }, 512.0, 512.0)
+        stage.scene = Scene(HBox().also { hBox -> hBox.children.addAll(
+            GridPane().apply {
+                prefWidth = BOARD_WIDTH
+                prefHeight = BOARD_HEIGHT
+                redrawBoard(this)
+            },
+            VBox().also { vBox ->
+                vBox.prefWidth = GAME_WIDTH - BOARD_WIDTH
+                vBox.prefHeight = GAME_HEIGHT
+                vBox.alignment = Pos.CENTER
+                vBox.children.addAll(Text("Timeline View").apply {
+                    font = Font.font("verdana", 30.0)
+                    textAlignment = TextAlignment.CENTER
+                }, Text(currentBoard.toString()))
+            }
+        ) }, GAME_WIDTH, 512.0).apply {
+            addEventHandler(KeyEvent.KEY_PRESSED) { key ->
+                when (key.code) {
+                    /*KeyCode.LEFT -> {
+                        if (currentBoard >= 0) {
+                            currentBoard--
+                            println(currentBoard)
+                            redrawBoard(root.childrenUnmodifiable[0] as GridPane)
+                        }
+                    }
+                    KeyCode.RIGHT -> {
+                        if (currentBoard < game.history.lastIndex) {
+                            currentBoard++
+                            println(currentBoard)
+                            redrawBoard(root.childrenUnmodifiable[0] as GridPane)
+                        }
+                    }*/
+                    else -> {}
+                }
+            }
+        }
         stage.isResizable = false
         stage.show()
     }
@@ -35,7 +79,7 @@ class ChessApplication : Application() {
                             heightProperty().bind(grid.heightProperty().divide(8))
                         })
                         board[x + 1, 8 - y]?.apply {
-                            stack.children.add(PieceView({ endX, endY ->
+                            stack.children.add(PieceView(grid, { endX, endY ->
                                 val moved = game.attemptMove(StandardMove(currentBoard, x + 1, 8 - y, endX, 9 - endY))
                                 if (game.history.lastIndex - 1 == currentBoard) currentBoard++
                                 if (moved) redrawBoard(grid)
@@ -45,5 +89,12 @@ class ChessApplication : Application() {
                 }
             }
         }
+    }
+
+    companion object {
+        val GAME_WIDTH = 828.416
+        val GAME_HEIGHT = 512.0
+        val BOARD_WIDTH = 512.0
+        val BOARD_HEIGHT = 512.0
     }
 }
