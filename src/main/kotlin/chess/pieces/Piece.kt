@@ -36,7 +36,7 @@ abstract class Piece(val pieceName: String, val side: Side) {
     override fun hashCode() = 31 * pieceName.hashCode() + side.hashCode()
 
     companion object {
-        val LIGHT_KING = King(Side.LIGHT)
-        val DARK_KING = King(Side.DARK)
+        val WHITE_KING = King(Side.WHITE)
+        val BLACK_KING = King(Side.BLACK)
     }
 }

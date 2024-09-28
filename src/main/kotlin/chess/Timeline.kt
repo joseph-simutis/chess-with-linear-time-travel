@@ -10,7 +10,7 @@ data class Timeline(val history: ArrayList<Pair<Move, BoardState>>) {
         else if (index > history.lastIndex) history.last().second
         else history[index].second
 
-    private fun getActiveSide(index: Int) = if (index % 2 != 0) Side.LIGHT else Side.DARK
+    fun getActiveSide(index: Int) = if (index % 2 != 0) Side.WHITE else Side.BLACK
 
     fun attemptMove(move: Move): Boolean {
         this[move.index].also { board ->
@@ -23,12 +23,4 @@ data class Timeline(val history: ArrayList<Pair<Move, BoardState>>) {
         }
         return true
     }
-
-    /*fun move(move: Move) {
-        move.applyTo(this)
-        Pair(move, this[move.index - 1].with(move)).also { event ->
-            if (history.isEmpty() || index == history.lastIndex) history += event
-            else history[index] = event
-        }
-    }*/
 }
