@@ -1,7 +1,7 @@
 package io.github.josephsimutis.display
 
-import io.github.josephsimutis.chess.Move
 import io.github.josephsimutis.chess.Timeline
+import io.github.josephsimutis.chess.moves.StandardMove
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.layout.GridPane
@@ -36,10 +36,7 @@ class ChessApplication : Application() {
                         })
                         board[x + 1, 8 - y]?.apply {
                             stack.children.add(PieceView({ endX, endY ->
-                                val moved = game.attemptMove(
-                                    currentBoard,
-                                    Move(x + 1, 8 - y, endX, 9 - endY)
-                                )
+                                val moved = game.attemptMove(StandardMove(currentBoard, x + 1, 8 - y, endX, 9 - endY))
                                 if (game.history.lastIndex - 1 == currentBoard) currentBoard++
                                 if (moved) redrawBoard(grid)
                             }, this, pieceSpritePath))

@@ -1,5 +1,6 @@
 package io.github.josephsimutis.chess
 
+import io.github.josephsimutis.chess.moves.Move
 import io.github.josephsimutis.chess.pieces.*
 
 data class BoardState(private val board: Array<Piece?>) {
@@ -39,7 +40,7 @@ data class BoardState(private val board: Array<Piece?>) {
         fromNotation(notation)?.also { (file, rank) -> this[file, rank] = piece }
     }
 
-    fun with(move: Move): BoardState {
+    /*fun with(move: Move): BoardState {
         if (!move.inBounds) throw IndexOutOfBoundsException("Attempted to make move that was out of bounds!")
         val piece = this[move.startFile, move.startRank]
         piece?.move()
@@ -48,7 +49,7 @@ data class BoardState(private val board: Array<Piece?>) {
             copy[move.startFile, move.startRank] = null
             move.additionalEffects(copy)
         }
-    }
+    }*/
 
     operator fun iterator() = board.iterator()
 

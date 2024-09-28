@@ -1,28 +1,30 @@
 package io.github.josephsimutis.chess.pieces
 
-import io.github.josephsimutis.chess.BoardState
-import io.github.josephsimutis.chess.Move
+import io.github.josephsimutis.chess.moves.StandardMove
 import io.github.josephsimutis.chess.Side
+import io.github.josephsimutis.chess.Timeline
+import io.github.josephsimutis.chess.moves.Move
 
 abstract class Piece(val pieceName: String, val side: Side) {
-    abstract fun getMoves(board: BoardState, file: Int, rank: Int): Array<Move>
+    abstract fun getMoves(timeline: Timeline, index: Int, file: Int, rank: Int): Array<Move>
 
-    fun checkMove(board: BoardState, move: Move, canMove: Boolean = true, canCapture: Boolean = true) =
+    fun checkMove(timeline: Timeline, move: StandardMove, canMove: Boolean = true, canCapture: Boolean = true) = timeline[move.index].let { board ->
         if (!move.inBounds) null
         else if (canMove && board[move.endFile, move.endRank] == null
             || canCapture && board[move.endFile, move.endRank]?.side == !side
         ) move
         else null
+    }
 
-    fun checkLine(board: BoardState, startFile: Int, startRank: Int, incFile: Int, incRank: Int): Array<Move> {
+    fun checkLine(timeline: Timeline, index: Int, startFile: Int, startRank: Int, incFile: Int, incRank: Int): Array<StandardMove> {
         var currentFile = startFile
         var currentRank = startRank
-        val moves = ArrayList<Move>()
+        val moves = ArrayList<StandardMove>()
         while (true) {
             currentFile += incFile
             currentRank += incRank
             val move =
-                checkMove(board, Move(startFile, startRank, currentFile, currentRank)) ?: return moves.toTypedArray()
+                checkMove(timeline, StandardMove(index, startFile, startRank, currentFile, currentRank)) ?: return moves.toTypedArray()
             moves += move
         }
     }
