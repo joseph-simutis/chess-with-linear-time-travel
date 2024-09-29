@@ -5,7 +5,7 @@ import io.github.josephsimutis.chess.Side
 import io.github.josephsimutis.chess.Timeline
 
 class Rook(side: Side) : Piece("rook", side) {
-    private var canCastle = true
+    var canCastle = true
 
     override fun getMoves(timeline: Timeline, index: Int, file: Int, rank: Int): Array<Move> {
         val moves = ArrayList<Move>()

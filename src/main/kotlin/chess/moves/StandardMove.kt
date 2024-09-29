@@ -42,9 +42,7 @@ open class StandardMove(index: Int, startFile: Int, startRank: Int, val endFile:
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as StandardMove
+        if (other !is StandardMove) return false
 
         if (startFile != other.startFile) return false
         if (startRank != other.startRank) return false

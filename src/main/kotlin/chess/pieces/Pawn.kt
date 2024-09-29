@@ -19,16 +19,15 @@ class Pawn(side: Side) : Piece("pawn", side) {
         }
         checkMove(timeline, StandardMove(index, file, rank, file + 1, rank + side.direction), canMove=false)?.apply { moves += this }
         checkMove(timeline, StandardMove(index, file, rank, file - 1, rank + side.direction), canMove=false)?.apply { moves += this }
-        /*checkEnPassant(timeline, index, file, rank, 1)?.apply { moves += this }
-        checkEnPassant(timeline, index, file, rank, -1)?.apply { moves += this }*/
+        checkEnPassant(timeline, index, file, rank, 1)?.apply { moves += this }
+        checkEnPassant(timeline, index, file, rank, -1)?.apply { moves += this }
         return moves.toTypedArray()
     }
 
     private fun checkEnPassant(timeline: Timeline, index: Int, file: Int, rank: Int, leftOrRight: Int): Move? {
         timeline[index].also { board ->
             board[file + leftOrRight, rank].also { checking ->
-                if (javaClass == checking?.javaClass) {
-                    checking as Pawn
+                if (checking is Pawn) {
                     if (checking.enPassantPossible) {
                         return EnPassantMove(index, file, rank, leftOrRight, side.direction).let { move ->
                             if (!move.inBounds) null

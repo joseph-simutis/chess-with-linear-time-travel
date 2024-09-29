@@ -1,6 +1,7 @@
 package io.github.josephsimutis.chess
 
 import io.github.josephsimutis.chess.moves.Move
+import io.github.josephsimutis.chess.moves.StandardMove
 
 data class Timeline(val history: ArrayList<Pair<Move, BoardState>>) {
     constructor() : this(ArrayList())
@@ -15,12 +16,15 @@ data class Timeline(val history: ArrayList<Pair<Move, BoardState>>) {
     fun attemptMove(move: Move): Boolean {
         this[move.index].also { board ->
             if (board[move.startFile, move.startRank]?.side != getActiveSide(move.index)) return false
-            if (board[move.startFile, move.startRank]
-                    ?.getMoves(this, move.index, move.startFile, move.startRank)
-                    ?.contains(move) != true
-            ) return false
-            move.applyTo(this)
+            board[move.startFile, move.startRank]?.getMoves(this, move.index, move.startFile, move.startRank)?.forEach { move2 ->
+                if (move is StandardMove && move2 is StandardMove) {
+                    if (move.equals(move2)) {
+                        move2.applyTo(this)
+                        return true
+                    }
+                }
+            }
         }
-        return true
+        return false
     }
 }
