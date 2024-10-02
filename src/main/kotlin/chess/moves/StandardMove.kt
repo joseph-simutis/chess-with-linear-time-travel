@@ -2,7 +2,7 @@ package io.github.josephsimutis.chess.moves
 
 import io.github.josephsimutis.chess.BoardState
 import io.github.josephsimutis.chess.Timeline
-import io.github.josephsimutis.chess.pieces.Piece
+import io.github.josephsimutis.chess.pieces.*
 import io.github.josephsimutis.chess.toNotation
 
 open class StandardMove(index: Int, startFile: Int, startRank: Int, val endFile: Int, val endRank: Int) : Move(index, startFile, startRank) {
@@ -13,6 +13,24 @@ open class StandardMove(index: Int, startFile: Int, startRank: Int, val endFile:
                 (1..8).contains(endRank)
 
     override fun toString() = "${toNotation(startFile, startRank)} -> ${toNotation(endFile, endRank)}"
+
+    override fun toNotation(timeline: Timeline): String {
+        timeline[index].also { board ->
+            board[startFile, startRank].also { piece ->
+                val letter = when (piece?.javaClass) {
+                    King::class.java -> "K"
+                    Queen::class.java -> "Q"
+                    Rook::class.java -> "R"
+                    Bishop::class.java -> "B"
+                    Knight::class.java -> "N"
+                    Pawn::class.java -> ""
+                    else -> null
+                }
+
+                return "$letter${if (board[endFile, endRank] == null) "" else "${if (letter == "")toNotation(startFile, startRank)[0] else ""}x"}${toNotation(endFile, endRank)}"
+            }
+        }
+    }
 
     override fun hashCode(): Int {
         var result = startFile
@@ -26,8 +44,7 @@ open class StandardMove(index: Int, startFile: Int, startRank: Int, val endFile:
         if (!inBounds) throw IndexOutOfBoundsException("Attempted to make move that was out of bounds!")
         timeline[index].also { board ->
             board[startFile, startRank].also { piece ->
-                piece?.move()
-                Pair(this, board.copy().also { copy -> makeChanges(copy, piece) }).apply {
+                Pair(this, board.copyOf().also { copy -> makeChanges(copy, piece) }).apply {
                     if (index == timeline.history.lastIndex) timeline.history += this
                     else timeline.history[index + 1] = this
                 }
@@ -37,6 +54,7 @@ open class StandardMove(index: Int, startFile: Int, startRank: Int, val endFile:
 
     open fun makeChanges(board: BoardState, piece: Piece?) {
         board[endFile, endRank] = piece
+        board[endFile, endRank]?.move()
         board[startFile, startRank] = null
     }
 

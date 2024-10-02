@@ -7,5 +7,7 @@ abstract class Move(val index: Int, val startFile: Int, val startRank: Int) {
         get() = (1..8).contains(startFile) &&
                 (1..8).contains(startRank)
 
+    abstract fun toNotation(timeline: Timeline): String
+
     abstract fun applyTo(timeline: Timeline)
 }

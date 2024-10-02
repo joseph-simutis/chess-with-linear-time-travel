@@ -2,10 +2,10 @@ package io.github.josephsimutis.chess
 
 import io.github.josephsimutis.chess.pieces.*
 
-data class BoardState(private val board: Array<Piece?>) {
-    val lightKingCount: Int
+class BoardState(private val board: Array<Piece?>) {
+    private val lightKingCount: Int
         get() = board.count { it == Piece.WHITE_KING }
-    val darkKingCount: Int
+    private val darkKingCount: Int
         get() = board.count { it == Piece.BLACK_KING }
     val gameOver: Boolean
         get() = lightKingCount < 1 || darkKingCount < 1
@@ -52,6 +52,8 @@ data class BoardState(private val board: Array<Piece?>) {
     override fun hashCode(): Int {
         return board.contentDeepHashCode()
     }
+
+    fun copyOf() = BoardState(board.copyOf())
 
     companion object {
         val START = BoardState(Array(64) { index ->

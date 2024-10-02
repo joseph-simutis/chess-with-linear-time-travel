@@ -7,7 +7,6 @@ class CastleMove(index: Int, rank: Int, private val rookFile: Int, private val o
     override fun makeChanges(board: BoardState, piece: Piece?) {
         super.makeChanges(board, piece)
         val rook = board[rookFile, startRank]
-        rook?.move()
         board[endFile - (offset / 2), endRank] = rook
         board[rookFile, startRank] = null
     }

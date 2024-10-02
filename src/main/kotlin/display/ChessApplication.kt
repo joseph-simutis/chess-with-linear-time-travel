@@ -2,9 +2,12 @@ package io.github.josephsimutis.display
 
 import io.github.josephsimutis.chess.Timeline
 import io.github.josephsimutis.chess.moves.StandardMove
+import io.github.josephsimutis.chess.toNotation
 import javafx.application.Application
 import javafx.geometry.Pos
 import javafx.scene.Scene
+import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.GridPane
@@ -18,12 +21,15 @@ import javafx.scene.text.FontWeight
 import javafx.scene.text.Text
 import javafx.scene.text.TextAlignment
 import javafx.stage.Stage
+import java.io.FileInputStream
 
 class ChessApplication : Application() {
     // Todo: allow user to add path manually
     private val pieceSpritePath = "/home/josephsimutis/Documents/test-chess-sprites/"
     private val game = Timeline()
     private var currentBoard = -1
+    private var selectedSquare: Triple<Int, Int, Int>? = null
+    private var highlightedSquares: Array<Triple<Int, Int, Int>> = arrayOf()
 
     override fun start(stage: Stage) {
         stage.title = "Chess with Linear Time Travel"
@@ -40,34 +46,49 @@ class ChessApplication : Application() {
                         grid.prefWidth = BOARD_WIDTH
                         grid.prefHeight = BOARD_HEIGHT
                         grid.children.clear()
+
+                        if (game.discontinuousPoints.contains(currentBoard)) {
+                            grid.setOnMousePressed { event ->
+                                val square = grid.screenToLocal(event.screenX, event.screenY).let {
+                                    Triple(
+                                        currentBoard,
+                                        ((it.x / grid.width) * 8).toInt() + 1,
+                                        8 - ((it.y / grid.height) * 8).toInt()
+                                    )
+                                }
+                                if (selectedSquare == null) {
+                                    highlightedSquares = game.getHighlightedSquares(square.first, square.second, square.third)
+                                    if (highlightedSquares.isNotEmpty()) {
+                                        selectedSquare = square
+                                        stage.scene = drawScene(stage)
+                                    }
+                                } else {
+                                    game.attemptMove(
+                                        StandardMove(
+                                            currentBoard,
+                                            selectedSquare!!.second,
+                                            selectedSquare!!.third,
+                                            square.second,
+                                            square.third
+                                        )
+                                    )
+                                    if (game.history.lastIndex - 1 == currentBoard) currentBoard++
+                                    selectedSquare = null
+                                    stage.scene = drawScene(stage)
+                                }
+                            }
+                        }
                         for (x in 0..7) {
                             for (y in 0..7) {
                                 grid.add(StackPane().also { stack ->
                                     stack.children.add(Rectangle().apply {
-                                        fill = if ((x + y) % 2 == 0) Color.LIGHTBLUE else Color.BLUE
+                                        val highlighted = isHighlighted(currentBoard, x + 1, 8 - y)
+                                        fill = if ((x + y) % 2 == 0) theme.light(highlighted) else theme.dark(highlighted)
                                         widthProperty().bind(grid.widthProperty().divide(8))
                                         heightProperty().bind(grid.heightProperty().divide(8))
                                     })
                                     board[x + 1, 8 - y]?.apply {
-                                        stack.children.add(
-                                            PieceView(
-                                                grid,
-                                                currentBoard == game.history.lastIndex && !board.gameOver,
-                                                this,
-                                                pieceSpritePath
-                                            ) { endX, endY ->
-                                                val moved = game.attemptMove(
-                                                    StandardMove(
-                                                        currentBoard,
-                                                        x + 1,
-                                                        8 - y,
-                                                        endX,
-                                                        9 - endY
-                                                    )
-                                                )
-                                                if (game.history.lastIndex - 1 == currentBoard) currentBoard++
-                                                if (moved) stage.scene = drawScene(stage)
-                                            })
+                                        stack.children.add(ImageView(Image(FileInputStream("$pieceSpritePath${side.sideName}_${pieceName}.png"))))
                                     }
                                 }, x, y)
                             }
@@ -80,14 +101,14 @@ class ChessApplication : Application() {
                         vBox.children.addAll(
                             Text("The present is at move ${game.history.lastIndex + 2}"),
                             Text("You are at move ${currentBoard + 2}"),
-                            (if (!game[currentBoard].gameOver) Text("${game.getActiveSide(currentBoard).sideName?.replaceFirstChar { char -> char.uppercase() }} to move")
-                            else Text("${game[currentBoard].winner?.sideName?.replaceFirstChar { char -> char.uppercase() }} has won!")),
+                            (if (!board.gameOver) Text("${game.getActiveSide(currentBoard).sideName?.replaceFirstChar { char -> char.uppercase() }} to move")
+                            else Text("${board.winner?.sideName?.replaceFirstChar { char -> char.uppercase() }} has won!")),
                             Text("Timeline View").apply {
                                 font = Font.font("verdana", 24.0)
                                 textAlignment = TextAlignment.CENTER
                             },
                             *game.history.mapIndexed { index, pair ->
-                                Text(pair.first.toString()).apply {
+                                Text("${index + 1}. ${pair.first.toNotation(game)}").apply {
                                     if (index == currentBoard) font = Font.font("verdana", FontWeight.BOLD, 12.0)
                                 }
                             }.toTypedArray()
@@ -116,10 +137,14 @@ class ChessApplication : Application() {
             }
         }
 
+    private fun isHighlighted(index: Int, file: Int, rank: Int) = highlightedSquares.contains(Triple(index, file, rank))
+
     companion object {
-        val GAME_WIDTH = 828.416
-        val GAME_HEIGHT = 512.0
-        val BOARD_WIDTH = 512.0
-        val BOARD_HEIGHT = 512.0
+        const val GAME_WIDTH = 828.416
+        const val GAME_HEIGHT = 512.0
+        const val BOARD_WIDTH = 512.0
+        const val BOARD_HEIGHT = 512.0
+
+        val theme = Theme.DEFAULT
     }
 }
