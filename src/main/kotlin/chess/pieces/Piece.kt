@@ -1,6 +1,6 @@
 package io.github.josephsimutis.chess.pieces
 
-import io.github.josephsimutis.chess.moves.StandardMove
+import io.github.josephsimutis.chess.moves.standard.StandardMove
 import io.github.josephsimutis.chess.Side
 import io.github.josephsimutis.chess.Timeline
 import io.github.josephsimutis.chess.moves.Move
@@ -26,6 +26,9 @@ abstract class Piece(val pieceName: String, val side: Side) {
             val move =
                 checkMove(timeline, StandardMove(index, startFile, startRank, currentFile, currentRank)) ?: return moves.toTypedArray()
             moves += move
+            if (timeline[index, currentFile, currentRank]?.side == !side) {
+                return moves.toTypedArray()
+            }
         }
     }
 

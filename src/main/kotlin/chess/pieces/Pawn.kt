@@ -1,11 +1,10 @@
 package io.github.josephsimutis.chess.pieces
 
-import io.github.josephsimutis.chess.BoardState
 import io.github.josephsimutis.chess.moves.Move
 import io.github.josephsimutis.chess.Side
 import io.github.josephsimutis.chess.Timeline
-import io.github.josephsimutis.chess.moves.EnPassantMove
-import io.github.josephsimutis.chess.moves.StandardMove
+import io.github.josephsimutis.chess.moves.standard.EnPassantMove
+import io.github.josephsimutis.chess.moves.standard.StandardMove
 
 class Pawn(side: Side) : Piece("pawn", side) {
     private var canDoubleJump = true

@@ -1,7 +1,7 @@
 package io.github.josephsimutis.chess
 
 import io.github.josephsimutis.chess.moves.Move
-import io.github.josephsimutis.chess.moves.StandardMove
+import io.github.josephsimutis.chess.moves.standard.StandardMove
 
 data class Timeline(val history: ArrayList<Pair<Move, BoardState>>, val discontinuousPoints: ArrayList<Int>) {
     constructor() : this(ArrayList(), ArrayList()) { discontinuousPoints += history.lastIndex }

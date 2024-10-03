@@ -1,7 +1,8 @@
-package io.github.josephsimutis.chess.moves
+package io.github.josephsimutis.chess.moves.standard
 
 import io.github.josephsimutis.chess.BoardState
 import io.github.josephsimutis.chess.Timeline
+import io.github.josephsimutis.chess.moves.Move
 import io.github.josephsimutis.chess.pieces.*
 import io.github.josephsimutis.chess.toNotation
 

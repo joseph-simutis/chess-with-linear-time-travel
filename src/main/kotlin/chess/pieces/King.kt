@@ -2,9 +2,9 @@ package io.github.josephsimutis.chess.pieces
 
 import io.github.josephsimutis.chess.Side
 import io.github.josephsimutis.chess.Timeline
-import io.github.josephsimutis.chess.moves.CastleMove
+import io.github.josephsimutis.chess.moves.standard.CastleMove
 import io.github.josephsimutis.chess.moves.Move
-import io.github.josephsimutis.chess.moves.StandardMove
+import io.github.josephsimutis.chess.moves.standard.StandardMove
 
 class King(side: Side) : Piece("king", side) {
     private var canCastle = true
@@ -19,18 +19,18 @@ class King(side: Side) : Piece("king", side) {
         checkMove(timeline, StandardMove(index, file, rank, file + 1, rank - 1))?.apply { moves += this }
         checkMove(timeline, StandardMove(index, file, rank, file, rank - 1))?.apply { moves += this }
         checkMove(timeline, StandardMove(index, file, rank, file - 1, rank - 1))?.apply { moves += this }
-        checkCastle(timeline, index, file, rank, 2)?.apply { moves += this }
-        checkCastle(timeline, index, file, rank, -2)?.apply { moves += this }
+        checkCastle(timeline, index, file, rank, true)?.apply { moves += this }
+        checkCastle(timeline, index, file, rank, false)?.apply { moves += this }
         return moves.toTypedArray()
     }
 
-    private fun checkCastle(timeline: Timeline, index: Int, file: Int, rank: Int, offset: Int): Move? {
+    private fun checkCastle(timeline: Timeline, index: Int, file: Int, rank: Int, positive: Boolean): Move? {
         timeline[index].also { board ->
-            if (board[file + (offset / 2), rank] != null) return null
-            board[file + offset, rank].also { checking ->
+            if (board[file + (if (positive) 1 else -1), rank] != null) return null
+            board[file + if (positive) 2 else -2, rank].also { checking ->
                 if (checking is Rook) {
                     if (checking.canCastle && this.canCastle) {
-                        return CastleMove(index, rank, if (offset > 0) 8 else 1, offset).let { move ->
+                        return CastleMove(index, file, rank, if (positive) 8 else 1, positive).let { move ->
                             if (board[move.endFile, move.endRank] == null) move
                             else null
                         }

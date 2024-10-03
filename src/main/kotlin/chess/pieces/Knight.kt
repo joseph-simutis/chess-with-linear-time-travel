@@ -3,7 +3,7 @@ package io.github.josephsimutis.chess.pieces
 import io.github.josephsimutis.chess.moves.Move
 import io.github.josephsimutis.chess.Side
 import io.github.josephsimutis.chess.Timeline
-import io.github.josephsimutis.chess.moves.StandardMove
+import io.github.josephsimutis.chess.moves.standard.StandardMove
 
 class Knight(side: Side) : Piece("knight", side) {
     override fun getMoves(timeline: Timeline, index: Int, file: Int, rank: Int): Array<Move> {
