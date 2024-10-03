@@ -56,12 +56,13 @@ class ChessApplication : Application() {
                                         8 - ((it.y / grid.height) * 8).toInt()
                                     )
                                 }
-                                if (selectedSquare == null) {
-                                    highlightedSquares = game.getHighlightedSquares(square.first, square.second, square.third)
-                                    if (highlightedSquares.isNotEmpty()) {
-                                        selectedSquare = square
-                                        stage.scene = drawScene(stage)
-                                    }
+                                if (selectedSquare == null || game[square]?.side == game[selectedSquare!!]?.side) {
+                                    highlightedSquares =
+                                        game.getHighlightedSquares(square.first, square.second, square.third)
+                                    selectedSquare = square
+                                } else if (square == selectedSquare) {
+                                    selectedSquare = null
+                                    selectedSquare = square
                                 } else {
                                     game.attemptMove(
                                         StandardMove(
@@ -74,8 +75,8 @@ class ChessApplication : Application() {
                                     )
                                     if (game.history.lastIndex - 1 == currentBoard) currentBoard++
                                     selectedSquare = null
-                                    stage.scene = drawScene(stage)
                                 }
+                                stage.scene = drawScene(stage)
                             }
                         }
                         for (x in 0..7) {
@@ -83,7 +84,8 @@ class ChessApplication : Application() {
                                 grid.add(StackPane().also { stack ->
                                     stack.children.add(Rectangle().apply {
                                         val highlighted = isHighlighted(currentBoard, x + 1, 8 - y)
-                                        fill = if ((x + y) % 2 == 0) theme.light(highlighted) else theme.dark(highlighted)
+                                        fill =
+                                            if ((x + y) % 2 == 0) theme.light(highlighted) else theme.dark(highlighted)
                                         widthProperty().bind(grid.widthProperty().divide(8))
                                         heightProperty().bind(grid.heightProperty().divide(8))
                                     })

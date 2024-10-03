@@ -8,6 +8,6 @@ data class Theme(val lightSquare: Color, val darkSquare: Color, val lightSquareH
     fun dark(highlighted: Boolean): Color = if (highlighted) darkSquareHighlighted else darkSquare
 
     companion object {
-        val DEFAULT = Theme(Color.LIGHTBLUE, Color.DARKBLUE, Color.LIME, Color.GREEN)
+        val DEFAULT = Theme(Color.LIGHTBLUE, Color.BLUE, Color.GREENYELLOW, Color.GREEN)
     }
 }

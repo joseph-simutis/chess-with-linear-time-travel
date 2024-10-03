@@ -10,6 +10,8 @@ data class Timeline(val history: ArrayList<Pair<Move, BoardState>>, val disconti
 
     operator fun get(index: Int, file: Int, rank: Int) = this[index][file, rank]
 
+    operator fun get(triple: Triple<Int, Int, Int>) = this[triple.first, triple.second, triple.third]
+
     fun getActiveSide(index: Int) = if (index % 2 != 0) Side.WHITE else Side.BLACK
 
     fun attemptMove(move: Move): Boolean {
@@ -38,7 +40,7 @@ data class Timeline(val history: ArrayList<Pair<Move, BoardState>>, val disconti
             squares += Triple(index, file, rank)
             piece.getMoves(this, index, file, rank).forEach { move ->
                 if (move is StandardMove) {
-                    squares += Triple(move.index, move.endRank, move.endFile)
+                    squares += Triple(move.index, move.endFile, move.endRank)
                 }
             }
         }
